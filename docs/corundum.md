@@ -1,5 +1,4 @@
 
-```markdown
 # QEMU + cocotb + Corundum Co-Simulation
 
 Run the **unmodified mqnic Linux driver** against the **Corundum RTL** in
@@ -32,7 +31,7 @@ driver-directed RTL verification.
 
 | Component | Location | Notes |
 |-----------|----------|-------|
-| QEMU cosim PCIe device | `qemu-device/cpd.c` | Forwards config/MMIO as TLPs over ZMQ; GPL-2.0 |
+| QEMU cosim PCIe device | [fork](https://github.com/syedsk/qemu) | Forwards config/MMIO as TLPs over ZMQ; GPL-2.0 |
 | cocotbext-pcie CosimPort | [fork](https://github.com/syedsk/cocotbext-pcie/tree/qemu-cosim) | Based on v0.2.14 (Corundum-compatible) |
 | Corundum testbench | [fork](https://github.com/syedsk/corundum/tree/qemu_cosim) | `fpga/common/tb/mqnic_core_pcie_us_qemu_cosim/` |
 
@@ -199,12 +198,6 @@ Load the dependency first:
 ```bash
 sudo modprobe i2c-algo-bit
 ```
-
-### `AttributeError: 'CosimPort' object has no attribute 'fc_state'`
-The device model's `upstream_port` requires PCIe flow-control state. The
-CosimPort must provide an `fc_state` compatible with the device model
-(credits may be advertised as effectively unlimited for functional cosim).
-
 ### `ModuleNotFoundError: No module named 'cocotb.log'`
 cocotb version mismatch — use cocotb 1.8.x, not 2.x:
 ```bash
@@ -250,6 +243,6 @@ Built on [Corundum](https://github.com/corundum/corundum) and
 [cocotbext-pcie](https://github.com/alexforencich/cocotbext-pcie) by
 Alex Forencich. This project adds the QEMU co-simulation bridge enabling
 unmodified drivers to run against the Corundum RTL.
-```
+
 
 
