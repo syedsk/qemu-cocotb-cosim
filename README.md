@@ -1,5 +1,4 @@
 
-```markdown
 # QEMU ↔ cocotb Multi-Bus Co-Simulation
 
 A framework for running **unmodified guest drivers** against **RTL** in
