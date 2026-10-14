@@ -230,6 +230,8 @@ increment).
 - Since QEMU (the Root Complex) is effectively an always-ready consumer, the
  `CosimPort` advertises **effectively unlimited credits** via `fc_state`.
   This keeps DMA flowing without modeling real backpressure.
+- cocotb log level if set to DEBUG might trigger sw lock up on linux side.
+  Test with INFO or lower level log
 
 ## License
 
