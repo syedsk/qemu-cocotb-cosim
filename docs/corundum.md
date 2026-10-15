@@ -446,13 +446,6 @@ ubuntu@ubuntu:~/modules/mqnic$ ip -s link show enp1s0np0
 ```
 ## Troubleshooting
 
-### Driver doesn't bind — device shows `1234:00ff`
-cocotbext-pcie defaults `device_id` to `0x00ff`. Set it to match the
-mqnic driver's PCI table (`0x1001`) in the testbench:
-```python
-self.dev.functions[0].device_id = 0x1001
-```
-
 ### FW ID block reads `0x00000000` / probe fails with error `-5`
 QEMU's BAR0 must **forward MMIO to the cosim**, not return local data, and
 must be sized to match Corundum's Control BAR (16 MiB, 64-bit,
