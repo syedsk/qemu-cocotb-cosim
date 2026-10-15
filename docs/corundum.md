@@ -231,7 +231,9 @@ increment).
  `CosimPort` advertises **effectively unlimited credits** via `fc_state`.
   This keeps DMA flowing without modeling real backpressure.
 - cocotb log level if set to DEBUG might trigger sw lock up on linux side.
-  Test with INFO or lower level log
+  Test with INFO or lower level log.
+  [  167.426048] watchdog: BUG: soft lockup - CPU#2 stuck for 23s! [systemd:1]
+- It takes 5-10 minutes for insmod mqnic.ko to load.
 
 ## License
 
