@@ -9,7 +9,7 @@ transport, enabling a real guest OS running a real driver to drive real
 RTL — useful for pre-silicon driver development, HW/SW co-debug, and
 driver-directed RTL verification.
 
-## Architecture
+### Architecture
 
 ```
 ┌─────────────┐   TLPs/ZMQ   ┌───────────┐   RQ/RC/CQ/CC   ┌─────────────┐
@@ -27,7 +27,7 @@ driver-directed RTL verification.
 - **DMA:** Corundum RQ → device model → CosimPort → QEMU guest memory
 - **MSI-X:** Corundum MSI-X MemWr → device model → QEMU interrupt delivery
 
-## Components
+### Components
 
 | Component | Location | Notes |
 |-----------|----------|-------|
@@ -35,7 +35,7 @@ driver-directed RTL verification.
 | cocotbext-pcie CosimPort | [fork](https://github.com/syedsk/cocotbext-pcie/tree/qemu-cosim) | Based on v0.2.14 (Corundum-compatible) |
 | Corundum testbench | [fork](https://github.com/syedsk/corundum/tree/qemu_cosim) | `fpga/common/tb/mqnic_core_pcie_us_qemu_cosim/` |
 
-## Prerequisites
+### Prerequisites
 
 - Python 3.11
 - cocotb **1.8.1** (not 2.x)
@@ -46,9 +46,9 @@ driver-directed RTL verification.
   ([fork](https://github.com/syedsk/qemu))
 - An Ubuntu cloud image for the guest (e.g. `jammy-server-cloudimg-amd64.img`)
 
-## Setup
+### Setup
 
-### 1. Python environment
+#### 1. Python environment
 
 ```bash
 python3 -m venv corundum-sim-venv
@@ -63,7 +63,7 @@ cd cocotbext-pcie && git checkout qemu-cosim
 pip install -e . && cd ..
 ```
 
-### 2. Build QEMU with the cosim device
+#### 2. Build QEMU with the cosim device
 
 ```bash
 ../configure \
@@ -89,7 +89,7 @@ make -j$(nproc)
 The cocotb simulation must start **first** (it binds the ZMQ sockets);
 then QEMU connects.
 
-### 3. Start the cocotb simulation
+#### 3. Start the cocotb simulation
 
 ```bash
 cd corundum/fpga/common/tb/mqnic_core_pcie_us_qemu_cosim
@@ -99,7 +99,7 @@ pytest -o log_cli=True --log-cli-level=INFO -s test_mqnic_qemu_cosim.py
 Wait until the cosim server is listening (ports 5555 / 6000 / 6001 by
 default). The simulation then idles, waiting for QEMU.
 
-### 4. Launch QEMU
+#### 4. Launch QEMU
 
 ```bash
 qemu-system-x86_64 \
@@ -116,7 +116,7 @@ bar0_size=16777216,bar0_type=1,bar0_prefetch=on \
 BAR config for Corundum: BAR0 = 16 MiB, 64-bit (`bar0_type=1`),
 prefetchable. MSI-X lives inside BAR0, so no separate MSI-X BAR.
 
-### 5. Build and load the mqnic driver (in the guest)
+#### 5. Build and load the mqnic driver (in the guest)
 
 ```bash
 sudo apt-get update
@@ -134,7 +134,7 @@ dmesg | grep mqnic     # should show enumeration + "Registered device mqnic0"
 ip link                # a new interface (e.g. enp1s0np0) appears
 ```
 
-### 6. Test traffic (loopback)
+#### 6. Test traffic (loopback)
 
 ```bash
 sudo ip addr add 192.168.100.1/24 dev enp1s0np0
@@ -151,7 +151,7 @@ ip -s link show enp1s0np0
 > answer ARP. The proof of a working datapath is that **both TX and RX
 > packet counters increment** in `ip -s link show`.
 
-## Testbench Environment Variables
+### Testbench Environment Variables
 
 The cocotb testbench honors:
 
@@ -162,7 +162,7 @@ The cocotb testbench honors:
 | `COSIM_LOG_LEVEL` | `INFO` | testbench log level |
 | `COSIM_MAX_US` | `0` | max sim time in µs (0 = run forever) |
 
-## QEMU Device BAR Configuration
+### QEMU Device BAR Configuration
 
 The `cocotb-pcie-endpoint` device takes BAR layout via properties, so the
 same binary works for different endpoints without recompiling:
@@ -176,9 +176,9 @@ same binary works for different endpoints without recompiling:
 Example (Corundum): `bar0_size=16777216,bar0_type=1,bar0_prefetch=on`
 A 64-bit BAR consumes two BAR slots, so leave the next `barN_size=0`.
 
-## Example Run
+### Example Run
 
-### cocotb side (simulation)
+#### cocotb side (simulation)
 
 ```
 INFO     cocotb:simulator.py:302      0.00ns INFO     cocotb                             Running on Icarus Verilog version 11.0 (stable)
@@ -296,7 +296,7 @@ INFO     cocotb:simulator.py:302 387212.00ns INFO     ..otb.mqnic_core_pcie_us.s
 
 ```
 
-### QEMU guest side (driver load)
+#### QEMU guest side (driver load)
 
 ```
 ubuntu@ubuntu:~$ lspci -v
@@ -444,9 +444,9 @@ ubuntu@ubuntu:~/modules/mqnic$ ip -s link show enp1s0np0
 
 
 ```
-## Troubleshooting
+### Troubleshooting
 
-### FW ID block reads `0x00000000` / probe fails with error `-5`
+#### FW ID block reads `0x00000000` / probe fails with error `-5`
 QEMU's BAR0 must **forward MMIO to the cosim**, not return local data, and
 must be sized to match Corundum's Control BAR (16 MiB, 64-bit,
 prefetchable):
@@ -454,33 +454,33 @@ prefetchable):
 bar0_size=16777216,bar0_type=1,bar0_prefetch=on
 ```
 
-### `insmod: ERROR ... Unknown symbol i2c_bit_add_bus`
+#### `insmod: ERROR ... Unknown symbol i2c_bit_add_bus`
 Load the dependency first:
 ```bash
 sudo modprobe i2c-algo-bit
 ```
-### `ModuleNotFoundError: No module named 'cocotb.log'`
+#### `ModuleNotFoundError: No module named 'cocotb.log'`
 cocotb version mismatch — use cocotb 1.8.x, not 2.x:
 ```bash
 pip install "cocotb==1.8.1"
 ```
 
-### `TypeError: object.__init__() takes exactly one argument`
+#### `TypeError: object.__init__() takes exactly one argument`
 cocotbext-pcie version mismatch with the testbench. Use cocotbext-pcie
 **0.2.14** (the Corundum-compatible version / this fork).
 
-### Simulation appears to "hang" after reset
+#### Simulation appears to "hang" after reset
 Expected — the harness idles in a `while True` loop waiting for QEMU to
 connect and drive TLPs. Start QEMU to proceed.
 
-## Status
+### Status
 
 End-to-end verified: the unmodified mqnic driver enumerates the device,
 brings up queues/scheduler/ports, registers a network interface, and moves
 packets bidirectionally through the cocotb MAC loopback (TX and RX counters
 increment).
 
-## Known Limitations
+### Known Limitations
 
 - **Speed:** cycle-accurate RTL simulation is slow (~1 µs sim per second of
   wall time); suitable for functional/debug work, not performance testing.
@@ -496,13 +496,13 @@ increment).
   [  167.426048] watchdog: BUG: soft lockup - CPU#2 stuck for 23s! [systemd:1]
 - It takes 5-10 minutes for insmod mqnic.ko to load.
 
-## License
+### License
 
 - QEMU device code (`qemu-device/`): **GPL-2.0** (links QEMU)
 - Testbench and documentation: **BSD-2-Clause-Views** (matches Corundum and
   cocotbext-pcie)
 
-## Acknowledgments
+### Acknowledgments
 
 Built on [Corundum](https://github.com/corundum/corundum) and
 [cocotbext-pcie](https://github.com/alexforencich/cocotbext-pcie) by
